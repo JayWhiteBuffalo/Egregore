@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/JayWhiteBuffalo/Egregore/issues"
   },
-  "homepage": "https://github.com/JayWhiteBuffalo/Egregore#readme"
+  "homepage": "https://github.com/JayWhiteBuffalo/Egregore#readme",
+  "dependencies": {
+    "validator": "^13.7.0"
+  }
 }
