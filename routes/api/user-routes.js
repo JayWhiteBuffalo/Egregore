@@ -7,7 +7,7 @@ router
     .get(getAllUsers)
     .post(createUser);
 
-//Set up GET one, PUT, and DELETE at /api/pizzas/:id
+//Set up GET one, PUT, and DELETE at /api/users/:id
 router
     .route('/:id')
     .get(getUserById)

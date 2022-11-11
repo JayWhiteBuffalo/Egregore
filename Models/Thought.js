@@ -15,6 +15,7 @@ const ReactionSchema = new Schema(
             type: String,
             required: true,
             //Set VarChar 280 max
+            maxLength: 280
         },
         username:{
             type: String,
@@ -25,14 +26,22 @@ const ReactionSchema = new Schema(
             default: Date.now,
             get: createdAtVal => dateFormat(createdAtVal)
         }
+    },
+    {
+        toJSON: {
+            getters: true
+        }
     }
-)
+);
 
 const ThoughtSchema = new Schema({
     thoughtText: {
         type: String,
         required: true,
         //must be between 1 and 280 char
+        //can use mogoose-validator making a function with validator of 'isLength' and argument of [1, 280]
+        //however using maxlength is cleaner and will work in this case since thoughttext is required and a value of 0 will not be accepted
+        maxLength: 280
     },
     createdAt: {
         type: Date,
@@ -50,7 +59,7 @@ const ThoughtSchema = new Schema({
         virtuals: true,
         getters: true
     },
-    //id: false
+    id: false
 }
 );
 //get total count of reactions on retrieval 

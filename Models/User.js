@@ -1,4 +1,5 @@
 const {Schema, model} = require('mongoose');
+//npm package used for validation
 const { isEmail } = require ('validator');
 
  const UserSchema = new Schema ({
@@ -18,7 +19,7 @@ const { isEmail } = require ('validator');
     thoughts: [
         {
             type: Schema.Types.ObjectId,
-            ref: 'Thoughts'
+            ref: 'Thought'
         }
     ],
     friends: [
