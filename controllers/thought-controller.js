@@ -4,6 +4,7 @@ const thoughtController = {
     //get all thoughts
     getAllThoughts(req, res) {
         Thought.find({})
+            .sort({ createdAt: -1 })
             .then(dbThoughtData => res.json(dbThoughtData))
             .catch(err => {
                 console.log(err);
@@ -12,7 +13,7 @@ const thoughtController = {
     },
     //get single thought by its _id
     getThoughtById({ params }, res) {
-        Thought.findOne({ _id: params.id })
+        Thought.findOne({ _id: params.thoughtId })
         .then(dbThoughtData => {
             if (!dbThoughtData) {
                 res.status(404).json({ message: 'No Thought found with this id.'});
@@ -27,15 +28,14 @@ const thoughtController = {
     },
     //post to create a new thought
     //Need to debug. Will add Thought but still throws 404.////This was fixed by correcting routes in thought-routes.js  
-    addThought({params, body }, res) {
-        console.log(body);
-        Thought.create(body)
-            .then(({ _id }) => {
+    addThought(req , res) {
+        Thought.create(req.body)
+            .then((dbThoughtData) => {
                 //push the created thoughts _id to the associated user's thoughts array field
                 return User.findOneAndUpdate(
                     //This Id is returning as undefined////This was fixed by correcting routes in thought-routes.js 
-                    { _id: params.userId },
-                    { $push: { thoughts: _id } },
+                    { _id: req.body.userId },
+                    { $push: { thoughts: dbThoughtData._id } },
                     {new: true}
                 );
             })
@@ -44,25 +44,42 @@ const thoughtController = {
                     res.status(404).json({ message: 'No User found with this id.'});
                     return;
                 }
-                res.json(dbUserData);
+
+                res.json({ message: "Thought creation sucessfull"});
             })
             .catch(err => res.json(err));
     },
     
 
     //put to update a thought by its _id
-
+    updateThought({ params, body }, res){
+        Thought.findOneAndUpdate(
+            {_id: params.thoughtId },
+            { $set: {thoughts: body} },
+            { runValidators: true, new: true}
+        )
+        .then((dbThoughtData) => {
+            if (!dbThoughtData) {
+                res.status(404).json({ message: "No thought with this id"});
+                return
+            }
+            res.json(dbThoughtData);
+        })
+        .catch((err) => {console.log(err);
+        res.status(500).json(err);
+        });
+    },
     //delete to remove a thought by _id
     //This route is crashing the server//not liking 'params.thoughtid'//This was fixed by correcting routes in thought-routes.js 
-    removeThought({ params }, res) {
-        Thought.findOneAndDelete({ _id: params.thoughtId })
+    removeThought(req, res) {
+        Thought.findOneAndDelete({ _id: req.params.thoughtId })
           .then(deletedThought => {
             if (!deletedThought) {
               return res.status(404).json({ message: 'No Thought with this id!' });
             }
             return User.findOneAndUpdate(
-              { _id: params.userId },
-              { $pull: { thoughts: params.thoughtId } },
+              { thoughts: req.params.thoughtId },
+              { $pull: { thoughts: req.params.thoughtId } },
               { new: true }
             );
           })
@@ -76,10 +93,10 @@ const thoughtController = {
           .catch(err => res.json(err));
       },
     //add Reaction
-    addReaction({params, body}, res) {
+    addReaction(req, res) {
         Thought.findOneAndUpdate(
-            {_id: params.thoughtId},
-            {$push: {replies: body}},
+            {_id: req.params.thoughtId},
+            {$addToSet: {reactions: req.body}},
             {new: true, runValidators: true}
     )
           .then(dbUserData => {
@@ -92,15 +109,23 @@ const thoughtController = {
             .catch(err => res.json(err));    
     },
     //remove Reaction
-    removeReaction({params}, res) {
+    removeReaction(req, res) {
         Thought.findOneAndDelete(
-            {_id: params.thoughtId},
-            {$pull: {replies: {reactionId: params.reactionId}}},
-            {new: true}
+            {_id: req.params.thoughtId},
+            {$pull: { reactions: {reactionId: req.params.reactionId}}},
+            {new: true, runValidators: true}
         )
-            .then(dbUserData = res.json(dbUserData))
-            .catch(err => res.json(err));
-    },
+            .then((dbUserData) => {
+                if(!dbThoughtData) {
+                    res.status(404).json({ message: "No thought with this id."});
+                }
+            res.json(dbUserData);
+            })
+            .catch((err) => {
+                console.log(err);
+                res.status(500).json(err);
+    });
+   },
 
 };
 
