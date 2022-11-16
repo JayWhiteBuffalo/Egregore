@@ -13,6 +13,8 @@ router
     .get(getUserById)
     .put(updateUser)
     .delete(deleteUser);
+
+
 ///api/users/:userId/friends/:friendId
 router
     .route('/:userId/friends/:friendId')

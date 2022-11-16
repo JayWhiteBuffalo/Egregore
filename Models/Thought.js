@@ -9,7 +9,7 @@ const ReactionSchema = new Schema(
         //set cust id to avoid confusion with parent thought_id
         reactionId: {
             type: Schema.Types.ObjectId,
-            default: () => new Types.ObjectId()
+            default: new Types.ObjectId()
         },
         reactionBody:{
             type: String,
@@ -30,7 +30,8 @@ const ReactionSchema = new Schema(
     {
         toJSON: {
             getters: true
-        }
+        },
+        id: false
     }
 );
 
